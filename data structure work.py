@@ -1,67 +1,60 @@
 from collections import deque
 
-class TaskPlanner:
-    def __init__(self):
-        self.task_stack = []      
-        self.task_queue = deque() 
-        self.completed_tasks = []  
+# Stack for undoing tasks (LIFO)
+undo_stack = []
 
-    
-    def add_task(self, task):
-        self.task_queue.append(task)
-        print(f"Task '{task}' added to the queue.")
+# Queue for processing task assignments (FIFO)
+task_queue = deque()
 
-    
-    def process_task(self):
-        if self.task_queue:
-            task = self.task_queue.popleft()
-            self.task_stack.append(task)
-            print(f"Processing task '{task}'...")
-        else:
-            print("No tasks to process.")
+# List for tracking completed tasks
+completed_tasks = []
 
-    
-    def complete_task(self):
-        if self.task_stack:
-            task = self.task_stack.pop()
-            self.completed_tasks.append(task)
-            print(f"Task '{task}' completed.")
-        else:
-            print("No tasks to complete.")
+# Function to add a task to the queue
+def add_task(task):
+    task_queue.append(task)
+    print(f"Task '{task}' added to the queue.")
 
-    
-    def undo_last_completed_task(self):
-        if self.completed_tasks:
-            task = self.completed_tasks.pop()
-            self.task_queue.appendleft(task)
-            print(f"Task '{task}' undone and added back to the queue.")
-        else:
-            print("No completed tasks to undo.")
+# Function to process tasks from the queue
+def process_task():
+    if task_queue:
+        task = task_queue.popleft()  # Remove from front of queue (FIFO)
+        completed_tasks.append(task)  # Add to completed list
+        print(f"Task '{task}' completed.")
+    else:
+        print("No tasks in the queue to process.")
 
-    def show_status(self):
-        print("\nTask Queue:", list(self.task_queue))
-        print("Task Stack (Undo):", self.task_stack)
-        print("Completed Tasks:", self.completed_tasks, "\n")
+# Function to undo the last completed task
+def undo_last_task():
+    if completed_tasks:
+        last_task = completed_tasks.pop()  # Remove from completed list
+        undo_stack.append(last_task)  # Add to undo stack
+        print(f"Task '{last_task}' undone.")
+    else:
+        print("No completed tasks to undo.")
 
+# Function to redo the last undone task
+def redo_task():
+    if undo_stack:
+        task = undo_stack.pop()  # Remove from undo stack (LIFO)
+        completed_tasks.append(task)  # Add back to completed list
+        print(f"Task '{task}' redone.")
+    else:
+        print("No tasks to redo.")
 
+# Example of usage
+add_task("Task A")
+add_task("Task B")
+add_task("Task C")
 
-planner = TaskPlanner()
+process_task()  # Completes Task A
+process_task()  # Completes Task B
+process_task()  # Completes Task C
 
-planner.add_task("Task 1")
-planner.add_task("Task 2")
-planner.add_task("Task 3")
+undo_last_task()  # Undo Task C
+undo_last_task()  # Undo Task B
 
+redo_task()  # Redo Task B
 
-planner.process_task()
-planner.process_task()
-
-
-planner.complete_task()
-
-
-planner.show_status()
-
-planner.undo_last_completed_task()
-
-
-planner.show_status()
+print("\nTask Queue:", list(task_queue))
+print("Completed Tasks:", completed_tasks)
+print("Undo Stack:", undo_stack)
